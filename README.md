@@ -1,6 +1,6 @@
-# 封面和文案
+# Cover and Copy
 
-`封面和文案` 是一个用于 Codex 的本地 skill，用中文文案生成 3 张 3:4 竖版短视频封面图。
+`Cover and Copy` 是一个用于 Codex 的本地 skill，用中文文案生成 3 张 3:4 竖版短视频封面图。
 
 ## 在 Codex 里使用
 
@@ -9,7 +9,7 @@
 在 Codex 中安装或放置到 skills 目录后，可以通过下面的方式触发：
 
 ```text
-使用封面和文案技能
+使用 Cover and Copy 技能
 ```
 
 然后粘贴中文文案，skill 会按规则生成 3 张封面。
