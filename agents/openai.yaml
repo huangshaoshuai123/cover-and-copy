@@ -1,0 +1,4 @@
+interface:
+  display_name: "huang bai"
+  short_description: "上传文案和人脸参考图，生成三张高点击短视频爆款封面图"
+  default_prompt: "Use $huang-bai to generate 3 high-click short-video covers from my copy and face reference."
