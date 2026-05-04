@@ -1,6 +1,6 @@
 # Cover and Copy
 
-`Cover and Copy` 是一个用于 Codex 的本地 skill，用中文文案生成 3 张 3:4 竖版短视频封面图。
+`Cover and Copy` 是一个用于 Codex 的本地 skill，可根据中文文案、视频脚本、大纲或文档内容生成高点击短视频封面和小红书配套文案，并支持多风格视觉适配、固定人脸身份参考、竖版 3:4 与横版 16:9/4:3 延展。
 
 ## 在 Codex 里使用
 
@@ -12,25 +12,28 @@
 使用 Cover and Copy 技能
 ```
 
-然后粘贴中文文案，skill 会按规则生成 3 张封面。
+然后粘贴中文文案、视频脚本或大纲，skill 会按规则生成 3 张竖版封面；需要横版时，再基于竖版母版延展为同系列横版；需要发布文案时，会生成小红书标题和 200 字左右正文。
 
 ## 发布流程
 
 这个仓库用于发布 Codex skill 本身。更新流程是：
 
-1. 修改 `SKILL.md`、`README.md` 或素材文件。
+1. 修改 `SKILL.md`、`README.md`、`references/` 或素材文件。
 2. 在本地 Git 仓库提交改动。
 3. 推送到 GitHub 仓库。
 4. 在 Codex 的 skills 目录中安装或同步这个仓库后使用。
 
 ## 能力范围
 
-- 根据中文文案提炼短视频封面主钩子。
+- 根据中文文案、视频脚本、大纲或文档内容提炼短视频封面主钩子。
 - 默认生成 3 张 3:4 竖版封面。
-- 默认使用 `assets/face/default-face.png` 作为人脸参考图。
+- 支持根据竖版母版延展生成 16:9 和 4:3 横版封面。
+- 支持根据脚本、大纲或内容简报生成小红书标题和 200 字左右正文。
+- 默认参考“设计师黄白”的历史表达风格：工具发现、能力判断、编号总结、轻推荐。
+- 默认使用 `assets/face/default-face.png` 作为人脸身份参考图。
 - 强制要求把人脸图作为真实图片输入传给生图模型，不能只在提示词里写图片路径。
-- 默认让人物保持参考图长相和发型，并优化为自信的笑容。
-- 参考 `assets/style-references/` 下的成功封面质感，禁用廉价金属字、镭射字、蓝紫科技风和赛博光效。
+- 默认让人物保持本人脸部辨识度，但根据主题调整表情、服装、动作、光线和场景。
+- 支持多种视觉风格，参考 `assets/style-references/` 下的成功封面层级和质感，但不默认绑定复古风。
 
 ## 目录结构
 
@@ -40,13 +43,19 @@
 ├── README.md
 ├── agents/
 │   └── openai.yaml
-└── assets/
-    ├── face/
-    │   └── default-face.png
-    └── style-references/
-        ├── ai-short-drama-cover.png
-        ├── web-design-cover.png
-        └── world-model-cover.png
+├── assets/
+│   ├── face/
+│   │   └── default-face.png
+│   └── style-references/
+│       ├── ai-short-drama-cover.png
+│       ├── web-design-cover.png
+│       └── world-model-cover.png
+└── references/
+    ├── content-brief.md
+    ├── copywriting.md
+    ├── cover-prompt-templates.md
+    ├── horizontal-adaptation.md
+    └── style-system.md
 ```
 
 ## 注意事项
