@@ -3,3 +3,11 @@
 tmp/
 __pycache__/
 *.pyc
+node_modules/
+.next/
+out/
+dist/
+.env
+.env.*
+!.env.example
+output/
