@@ -17,22 +17,16 @@ const defaultScript =
   "我做了一个 AI App 新功能演示，能把普通产品截图一键变成可发布的高质感广告图。想做一组小红书封面和发布文案，重点突出：普通截图也能一键变大片，适合设计师、电商运营和内容创作者。";
 
 export default function Page() {
-  const [apiKey, setApiKey] = useState("");
-  const [baseUrl, setBaseUrl] = useState("https://linkapi.ai/v1");
   const [script, setScript] = useState(defaultScript);
-  const [textModel, setTextModel] = useState("gpt-4o-mini");
-  const [imageModel, setImageModel] = useState("gpt-image-2");
-  const [fallbackModel, setFallbackModel] = useState("gpt-image-2-c");
-  const [faceFile, setFaceFile] = useState<File | null>(null);
   const [scriptFileName, setScriptFileName] = useState("");
   const [result, setResult] = useState<GenerateResult | null>(null);
-  const [message, setMessage] = useState("等待输入脚本和 API key。");
+  const [message, setMessage] = useState("上传或粘贴脚本后即可生成。");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const canSubmit = useMemo(() => {
-    return apiKey.trim().length > 0 && script.trim().length > 20 && !loading;
-  }, [apiKey, script, loading]);
+    return script.trim().length > 20 && !loading;
+  }, [script, loading]);
 
   async function onScriptFile(file: File | null) {
     if (!file) return;
@@ -49,13 +43,7 @@ export default function Page() {
     setMessage("正在提炼脚本、匹配风格并生成封面。");
 
     const form = new FormData();
-    form.set("apiKey", apiKey.trim());
-    form.set("baseUrl", baseUrl.trim());
     form.set("script", script.trim());
-    form.set("textModel", textModel.trim());
-    form.set("imageModel", imageModel.trim());
-    form.set("fallbackImageModel", fallbackModel.trim());
-    if (faceFile) form.set("faceImage", faceFile);
 
     try {
       const response = await fetch("/api/generate", {
@@ -67,7 +55,7 @@ export default function Page() {
         throw new Error(payload.error || "生成失败");
       }
       setResult(payload);
-      setMessage("生成完成。API key 只用于本次请求，服务端不会保存。");
+      setMessage("生成完成。封面默认使用固定人脸参考图。");
     } catch (err) {
       setError(err instanceof Error ? err.message : "生成失败");
       setMessage("生成未完成。");
@@ -83,64 +71,9 @@ export default function Page() {
           <div className="brand">
             <div>
               <h1>Cover and Copy</h1>
-              <p>上传脚本，生成小红书文案和 3:4 封面。API key 只在本次请求中使用。</p>
+              <p>上传脚本，生成小红书文案和 3:4 封面。后端使用已配置好的生成通道。</p>
             </div>
-            <span className="status-pill">API Key 模式</span>
-          </div>
-
-          <div className="field">
-            <label htmlFor="apiKey">API key</label>
-            <input
-              id="apiKey"
-              className="input"
-              type="password"
-              value={apiKey}
-              onChange={(event) => setApiKey(event.target.value)}
-              placeholder="sk-..."
-              autoComplete="off"
-            />
-            <small>不要使用公共共享 key。线上请求由服务端转发，不写入数据库。</small>
-          </div>
-
-          <div className="field">
-            <label htmlFor="baseUrl">API base URL</label>
-            <input
-              id="baseUrl"
-              className="input"
-              value={baseUrl}
-              onChange={(event) => setBaseUrl(event.target.value)}
-            />
-          </div>
-
-          <div className="grid-2">
-            <div className="field">
-              <label htmlFor="imageModel">封面模型</label>
-              <input
-                id="imageModel"
-                className="input"
-                value={imageModel}
-                onChange={(event) => setImageModel(event.target.value)}
-              />
-            </div>
-            <div className="field">
-              <label htmlFor="fallbackModel">备用模型</label>
-              <input
-                id="fallbackModel"
-                className="input"
-                value={fallbackModel}
-                onChange={(event) => setFallbackModel(event.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="field">
-            <label htmlFor="textModel">文案模型</label>
-            <input
-              id="textModel"
-              className="input"
-              value={textModel}
-              onChange={(event) => setTextModel(event.target.value)}
-            />
+            <span className="status-pill">一键生成</span>
           </div>
 
           <div className="field">
@@ -164,19 +97,6 @@ export default function Page() {
               value={script}
               onChange={(event) => setScript(event.target.value)}
             />
-          </div>
-
-          <div className="field">
-            <label htmlFor="faceImage">人脸参考图</label>
-            <div className="file-box">
-              <input
-                id="faceImage"
-                type="file"
-                accept="image/png,image/jpeg,image/webp"
-                onChange={(event) => setFaceFile(event.target.files?.[0] || null)}
-              />
-              <small>可选。上传后会走图片编辑接口；不上传则生成不锁定真人身份的封面。</small>
-            </div>
           </div>
 
           <button className="primary" type="submit" disabled={!canSubmit}>
@@ -241,7 +161,7 @@ export default function Page() {
                 </div>
               ) : null}
 
-              <p className="meta">API key 不会写入页面状态以外的位置；刷新页面后需要重新输入。</p>
+              <p className="meta">封面默认使用固定人脸参考图；页面不会显示或收集 API key。</p>
             </div>
           </div>
         </section>

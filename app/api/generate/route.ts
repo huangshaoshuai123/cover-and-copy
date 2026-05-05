@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -56,6 +58,16 @@ const styleDocs = [
 function normalizeBaseUrl(value: string) {
   const cleaned = (value || "https://linkapi.ai/v1").trim().replace(/\/+$/, "");
   return cleaned.endsWith("/v1") ? cleaned : `${cleaned}/v1`;
+}
+
+function serverConfig() {
+  return {
+    apiKey: process.env.NEWAPI_API_KEY || process.env.OPENAI_API_KEY || "",
+    baseUrl: normalizeBaseUrl(process.env.NEWAPI_BASE_URL || process.env.OPENAI_BASE_URL || ""),
+    textModel: process.env.COPY_TEXT_MODEL || "gpt-4o-mini",
+    imageModel: process.env.COVER_IMAGE_MODEL || "gpt-image-2",
+    fallbackImageModel: process.env.COVER_FALLBACK_IMAGE_MODEL || "gpt-image-2-c"
+  };
 }
 
 function pickStyle(script: string) {
@@ -155,6 +167,12 @@ function buildCoverPrompt(script: string, style: (typeof styleDocs)[number], cop
   ].join("\n");
 }
 
+async function loadDefaultFace() {
+  const facePath = path.join(process.cwd(), "public", "default-face.png");
+  const bytes = await readFile(facePath);
+  return new Blob([new Uint8Array(bytes)], { type: "image/png" });
+}
+
 async function callImageApi({
   apiKey,
   baseUrl,
@@ -166,7 +184,7 @@ async function callImageApi({
   baseUrl: string;
   model: string;
   prompt: string;
-  faceImage: File | null;
+  faceImage: Blob | null;
 }) {
   const endpoint = faceImage ? `${baseUrl}/images/edits` : `${baseUrl}/images/generations`;
   const body = new FormData();
@@ -177,7 +195,7 @@ async function callImageApi({
   body.set("n", "1");
   body.set("output_format", "png");
   if (faceImage) {
-    body.set("image", faceImage, faceImage.name || "face.png");
+    body.set("image", faceImage, "default-face.png");
   }
 
   const response = await fetch(endpoint, {
@@ -207,26 +225,27 @@ async function callImageApi({
 export async function POST(request: Request) {
   try {
     const form = await request.formData();
-    const apiKey = String(form.get("apiKey") || "").trim();
+    const config = serverConfig();
     const script = String(form.get("script") || "").trim();
-    const baseUrl = normalizeBaseUrl(String(form.get("baseUrl") || ""));
-    const textModel = String(form.get("textModel") || "gpt-4o-mini").trim();
-    const imageModel = String(form.get("imageModel") || "gpt-image-2").trim();
-    const fallbackImageModel = String(form.get("fallbackImageModel") || "gpt-image-2-c").trim();
-    const faceValue = form.get("faceImage");
-    const faceImage = faceValue instanceof File && faceValue.size > 0 ? faceValue : null;
 
-    if (!apiKey) {
-      return NextResponse.json({ error: "缺少 API key。" }, { status: 400 });
+    if (!config.apiKey) {
+      return NextResponse.json({ error: "服务端缺少 API key 配置。" }, { status: 500 });
     }
     if (script.length < 20) {
       return NextResponse.json({ error: "脚本内容太短。" }, { status: 400 });
     }
 
     const style = pickStyle(script);
-    const copy = await generateCopy({ apiKey, baseUrl, model: textModel, script, styleName: style.name });
-    const coverPrompt = buildCoverPrompt(script, style, copy, Boolean(faceImage));
-    const models = [imageModel, fallbackImageModel].filter(Boolean);
+    const copy = await generateCopy({
+      apiKey: config.apiKey,
+      baseUrl: config.baseUrl,
+      model: config.textModel,
+      script,
+      styleName: style.name
+    });
+    const faceImage = await loadDefaultFace();
+    const coverPrompt = buildCoverPrompt(script, style, copy, true);
+    const models = [config.imageModel, config.fallbackImageModel].filter(Boolean);
     const uniqueModels = Array.from(new Set(models));
     const attempts: ImageAttempt[] = [];
     let imageUrl: string | null = null;
@@ -234,7 +253,13 @@ export async function POST(request: Request) {
 
     for (const model of uniqueModels) {
       try {
-        imageUrl = await callImageApi({ apiKey, baseUrl, model, prompt: coverPrompt, faceImage });
+        imageUrl = await callImageApi({
+          apiKey: config.apiKey,
+          baseUrl: config.baseUrl,
+          model,
+          prompt: coverPrompt,
+          faceImage
+        });
         imageModelUsed = model;
         attempts.push({ model, ok: true });
         break;
