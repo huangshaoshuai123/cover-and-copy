@@ -1,6 +1,8 @@
 # Copywriting
 
-Use this reference when the user asks for 小红书文案, 标题, 发布文案, 简介, caption, or 全套内容包装. The default voice is "设计师黄白": professional, efficient, tool-focused, and lightly excited without becoming ad copy.
+Use this reference when the user asks for 小红书文案, 标题, 发布文案, 简介, caption, 自媒体三件套, or 全套内容包装. The default voice is "设计师黄白": professional, efficient, tool-focused, and lightly excited without becoming ad copy.
+
+Startup phrase: when the user says `我要生成自媒体三件套`, `生成自媒体三件套`, or `自媒体三件套`, route to the dedicated 自媒体三件套 flow first. Do not treat it as a generic copywriting request.
 
 ## Output Defaults
 
@@ -10,6 +12,8 @@ Use this reference when the user asks for 小红书文案, 标题, 发布文案,
 - If the user asks for only正文/文案, output body only.
 - If the user asks for全套, output titles plus body, and do not repeat the cover prompt.
 - If the user asks for 封面 + 文案, generate cover assets first when image generation is requested, then output titles and body.
+- If the user asks for 自媒体三件套 and has already chosen `先生成文案和标题`, first ensure the user has manually selected one style from `references/cover-styles/`; then output titles plus body and ask the user to choose or revise one final title before cover generation.
+- If the user asks for 自媒体三件套 and has chosen `直接生图并同时给标题文案`, first ensure the user has manually selected one style from `references/cover-styles/`; then output titles plus body alongside the 3 vertical cover candidates. Later horizontal adaptation should use the selected cover as the visual source, not wait for a final title decision.
 
 ## Routing
 
@@ -19,6 +23,10 @@ Choose the output mode from the user's wording:
 - **body-only**: `帮我写文案`, `小红书正文`, `发布文案`, `简介`, `caption`.
 - **title-plus-body**: `标题和文案`, `小红书文案`, `发布用`, `全套文案`.
 - **cover-plus-copy**: `全套`, `封面和文案`, `内容包装`, `封面生成完再写文案`.
+- **media-kit-copy-first**: `自媒体三件套` + 用户选择 `先生成文案和标题`; ask the user to manually choose a cover style first, then generate titles and body, then request one confirmed title before image generation.
+- **media-kit-direct**: `自媒体三件套` + 用户选择 `直接生图`; ask the user to manually choose a cover style first, then generate titles, body, and 3 vertical covers in the same delivery.
+
+For both media-kit routes, the 3 vertical covers must be 3 separate image files, not a single grid/collage image.
 
 When the request is title-only or body-only, do not generate images.
 
