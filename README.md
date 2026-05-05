@@ -1,89 +1,166 @@
-# Cover and Copy
+# Cover and Copy Web App
 
-`Cover and Copy` 是一个用于 Codex 的本地 skill，可根据中文文案、视频脚本、大纲或文档内容生成高点击短视频封面和小红书配套文案，并支持可配置封面风格文档、固定人脸身份参考、竖版 3:4 与横版 16:9/4:3 延展。
+`Cover and Copy Web App` 是 Cover and Copy 的网站版。用户只需要粘贴脚本，就能生成小红书标题、正文和一张 3:4 竖版封面图。
 
-## 在 Codex 里使用
-
-这个仓库不是独立网页应用，也不是命令行工具；它的目标使用环境是 OpenAI Codex 的 skill 系统。
-
-在 Codex 中安装或放置到 skills 目录后，可以通过下面的方式触发：
+线上地址：
 
 ```text
-使用 Cover and Copy 技能
+https://cover-and-copy-webapp.vercel.app
 ```
 
-然后粘贴中文文案、视频脚本或大纲。封面生成前，skill 会读取 `references/cover-styles/` 里的可用风格文档并自动匹配最合适的风格，然后直接按规则生成 3 张竖版封面。需要横版时，再基于竖版母版延展为同系列横版；需要发布文案时，会生成小红书标题和 200 字左右正文。
+## 功能
 
-## 发布流程
+- 粘贴中文脚本后，一次生成标题候选、小红书正文和封面图。
+- 服务端自动调用文案模型，前端不展示、不收集用户 API key。
+- 服务端优先使用 `gpt-image-2` 生成封面，失败后兜底使用 `gpt-image-2-c`。
+- 页面默认已经放入固定人物面部参考图。
+- 用户可以保留默认人脸、上传替换人脸，或删除人脸参考图。
+- 默认封面尺寸为 `1024x1536`，适配 3:4 竖版短视频封面。
+- 结果区会展示实际成功的图片模型和每个模型的尝试结果。
 
-这个仓库用于发布 Codex skill 本身。更新流程是：
+## 技术栈
 
-1. 修改 `SKILL.md`、`README.md`、`references/` 或素材文件。
-2. 在本地 Git 仓库提交改动。
-3. 推送到 GitHub 仓库。
-4. 在 Codex 的 skills 目录中安装或同步这个仓库后使用。
-
-## 能力范围
-
-- 根据中文文案、视频脚本、大纲或文档内容提炼短视频封面主钩子。
-- 默认生成 3 张 3:4 竖版封面。
-- 支持根据竖版母版延展生成 16:9 和 4:3 横版封面。
-- 支持根据脚本、大纲或内容简报生成小红书标题和 200 字左右正文。
-- 默认参考“设计师黄白”的历史表达风格：工具发现、能力判断、编号总结、轻推荐。
-- 默认使用 `assets/face/default-face.png` 作为人脸身份参考图。
-- 强制要求把人脸图作为真实图片输入传给生图模型，不能只在提示词里写图片路径。
-- 默认让人物保持本人脸部辨识度，但根据主题调整表情、服装、动作、光线和场景。
-- 默认通过 Codex 对话内置 `image_gen` 生成封面：先载入默认人脸图，再直接出图；同时提供 `scripts/face_edit_cover.py` 作为后台 API 兜底。
-- 支持在 `references/cover-styles/` 中配置多个独立封面风格文档，生成封面前会自动匹配风格并直接出图。
+- Next.js App Router
+- React
+- TypeScript
+- Vercel
+- LinkAPI / OpenAI 兼容接口
 
 ## 目录结构
 
 ```text
 .
-├── SKILL.md
-├── README.md
-├── agents/
-│   └── openai.yaml
-├── assets/
-│   ├── face/
-│   │   └── default-face.png
-│   └── style-references/
-│       ├── ai-short-drama-cover.png
-│       ├── web-design-cover.png
-│       └── world-model-cover.png
-├── scripts/
-│   └── face_edit_cover.py
-└── references/
-    ├── cover-styles/
-    │   ├── cinematic-blockbuster.md
-    │   ├── clean-knowledge-creator.md
-    │   ├── dramatic-before-after.md
-    │   ├── editorial-magazine.md
-    │   ├── minimal-product-visual.md
-    │   ├── real-workspace-documentary.md
-    │   ├── retro-commercial-poster.md
-    │   └── tech-product-launch.md
-    ├── content-brief.md
-    ├── copywriting.md
-    ├── cover-prompt-templates.md
-    ├── face-edit-workflow.md
-    └── horizontal-adaptation.md
+├── app/
+│   ├── api/generate/route.ts
+│   ├── globals.css
+│   ├── layout.tsx
+│   └── page.tsx
+├── public/
+│   └── default-face.png
+├── .env.example
+├── package.json
+└── README.md
 ```
 
-## 注意事项
+## 环境变量
 
-`assets/face/default-face.png` 是默认人脸参考图。如果要发布为公开仓库，请先确认这张图片可以公开；否则建议保持私有仓库，或替换成你允许公开的人脸参考图。
-
-默认使用 Codex 对话内置生图能力：先把 `assets/face/default-face.png` 作为图片载入当前上下文，再调用内置 `image_gen`，并在提示词中明确要求以上一张已载入的人脸图作为身份锚点。只有在内置生图不可用、用户明确要求后台 API，或需要兜底修复人脸稳定性时，才使用：
+本地开发时复制 `.env.example`：
 
 ```bash
-export CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
-export OPENAI_API_KEY="你的 key"
-
-python3 scripts/face_edit_cover.py \
-  --prompt "生成 3:4 竖版短视频封面，保留第一张输入图片中的同一真人身份，圣诞毛毡风产品广告，高级商业质感，大标题“圣诞广告”，副标“10分钟 AI生成”" \
-  --style-ref assets/style-references/ai-short-drama-cover.png \
-  --out output/imagegen/christmas-cover.png
+cp .env.example .env.local
 ```
 
-这个脚本会调用 `$CODEX_HOME/skills/.system/imagegen/scripts/image_gen.py edit`，并把 `assets/face/default-face.png` 作为第一张 `--image` 真正上传给 OpenAI 图片编辑接口。它是兜底链路，不是默认链路。
+配置下面这些变量：
+
+```bash
+NEWAPI_API_KEY=replace_me
+NEWAPI_BASE_URL=https://linkapi.ai/v1
+COPY_TEXT_MODEL=gpt-5.5
+COVER_IMAGE_MODEL=gpt-image-2
+COVER_FALLBACK_IMAGE_MODEL=gpt-image-2-c
+```
+
+说明：
+
+- `NEWAPI_API_KEY`：服务端使用的 API key。不要提交到 GitHub。
+- `NEWAPI_BASE_URL`：兼容 OpenAI API 的服务地址，默认走 `https://linkapi.ai/v1`。
+- `COPY_TEXT_MODEL`：文案模型，当前线上配置为 `gpt-5.5`。
+- `COVER_IMAGE_MODEL`：主图片模型，优先使用 `gpt-image-2`。
+- `COVER_FALLBACK_IMAGE_MODEL`：兜底图片模型，主模型失败时使用 `gpt-image-2-c`。
+
+代码也兼容 `OPENAI_API_KEY` 和 `OPENAI_BASE_URL`，但网站部署建议统一使用上面的 `NEWAPI_*` 变量。
+
+## 本地运行
+
+安装依赖：
+
+```bash
+npm install
+```
+
+启动开发服务：
+
+```bash
+npm run dev
+```
+
+打开：
+
+```text
+http://localhost:3000
+```
+
+生产构建验证：
+
+```bash
+npm run build
+```
+
+## 生成流程
+
+1. 前端提交脚本、可选人脸文件和人脸开关状态。
+2. 后端读取服务端环境变量，不从前端接收 API key。
+3. 后端调用文案模型生成标题和正文。
+4. 后端根据脚本关键词自动匹配封面风格。
+5. 如果用户保留默认人脸，后端读取 `public/default-face.png` 并作为图片编辑输入。
+6. 如果用户上传新的人脸图，后端使用本次上传的人脸图。
+7. 如果用户删除人脸参考图，后端改走无身份锚点的图片生成。
+8. 后端优先调用 `gpt-image-2`；如果失败，再调用 `gpt-image-2-c`。
+9. 前端展示封面、标题、正文、提示词和模型尝试结果。
+
+## 默认人脸参考图
+
+默认人脸图片位于：
+
+```text
+public/default-face.png
+```
+
+页面初始状态会显示这张图，并标记为“默认人脸参考图”。用户不做任何操作时，生成封面会默认使用这张图作为人物身份锚点。
+
+如果要更换默认人脸，直接替换 `public/default-face.png`，保持文件名不变即可。
+
+注意：如果这个仓库公开发布，请确认默认人脸图片有公开使用授权。否则应保持仓库私有，或替换成允许公开的人脸素材。
+
+## Vercel 部署
+
+项目已关联 Vercel，生产域名是：
+
+```text
+https://cover-and-copy-webapp.vercel.app
+```
+
+生产环境变量需要在 Vercel Project Settings 里配置，不要写入仓库：
+
+```text
+NEWAPI_API_KEY
+NEWAPI_BASE_URL
+COPY_TEXT_MODEL
+COVER_IMAGE_MODEL
+COVER_FALLBACK_IMAGE_MODEL
+```
+
+生产部署命令：
+
+```bash
+npm exec --yes vercel -- deploy --prod -y
+```
+
+## GitHub 分支
+
+网站版代码在分支：
+
+```text
+codex/cover-copy-webapp
+```
+
+Skill 版仍保留在 `master` 分支。网站版和 skill 版的交付形态不同，不要把网站部署配置直接合并回 skill 版。
+
+## 安全注意事项
+
+- 不要把真实 API key 写入 README、`.env.example` 或前端代码。
+- API key 只放在服务端环境变量里。
+- 前端页面不提供 API key、Base URL、模型名输入框。
+- 如果开放给别人使用，本质上是在让他们通过你的服务端额度生成内容；建议在正式公开前补充登录、限流、额度控制和日志审计。
+- 默认人脸图属于身份素材，公开仓库前必须确认授权边界。
+
