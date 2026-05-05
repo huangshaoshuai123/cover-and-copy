@@ -108,7 +108,7 @@ python /Users/huangshaotai/.codex/skills/cover-and-copy-master/scripts/face_edit
   --out-dir output/imagegen/cover_batch
 ```
 
-后台脚本说明：
+兜底后台脚本说明：
 
 - 该脚本默认 `--n 3`，会直接生成 3 张候选图。
 - 3 张候选图必须作为 3 个独立图片文件输出，不得拼成一张合集图；如果当前生图工具容易把多方案合并成同一张图，应逐张调用 3 次，每次生成 1 张独立 `3:4` 封面。
