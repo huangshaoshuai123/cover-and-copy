@@ -1,6 +1,6 @@
 # Cover Prompt Templates
 
-Use this reference to generate the first set of vertical covers. The default output is 3 distinct `3:4` vertical covers.
+Use this reference to generate the first set of vertical covers. The default output is 3 distinct, separate `3:4` vertical cover image files.
 
 ## Before Prompting
 
@@ -10,6 +10,7 @@ Load or infer:
 - Chosen style from `style-system.md`.
 - Identity reference image, normally `assets/face/default-face.png`.
 - Optional style reference images, used only for hierarchy and quality.
+- Confirmed title when the task is in the `先生成文案和标题` branch of 自媒体三件套.
 
 Do not output the prompt unless the user asks. Generate images directly when the image tool can use the face reference as an input image.
 
@@ -17,7 +18,11 @@ Do not output the prompt unless the user asks. Generate images directly when the
 
 - Ratio: `3:4`.
 - Quantity: 3 vertical covers by default.
+- Output form: each candidate must be a separate standalone image file. Do not create a grid, collage, contact sheet, comparison board, storyboard page, long image, or one image containing three cover designs.
+- Canvas discipline: each output image must strictly fill one `3:4` artboard. Do not include outer white margins, artboard mockups, multiple frames, or ratio preview boxes inside the generated image.
 - Same main title and subtitle across the 3 covers unless the user asks for title testing.
+- If the user confirmed a title after copywriting, use that title as the primary source for the in-image main title. Compress it only when it is too long for a mobile-readable cover.
+- If the user chose direct generation for 自媒体三件套, derive the cover title from the content brief and keep it stable through the later horizontal adaptation unless the user explicitly asks to change it.
 - Three covers must differ in composition, visual center, person-object relationship, and scene logic.
 - Keep one hook per cover.
 - The title should occupy the upper 25% to 40% of the image and remain readable on mobile.
@@ -36,7 +41,7 @@ Use this meaning in every prompt:
 ## Vertical Prompt Template
 
 ```text
-生成第 <n> 张封面，共 3 张。比例 3:4，短视频爆款封面，高级商业质感，强层级，强冲击。当前输入人脸图仅作为人物身份参考；当前风格参考图仅作为版式质感参考，不照抄文字、构图或题材。
+生成第 <n> 张封面，共 3 张候选中的独立单张。严格比例 3:4，画面必须填满一个竖版 3:4 画板，不要白边、不要画板预览、不要拼图、不要三宫格、不要合集图、不要在同一张图里出现多个候选。短视频爆款封面，高级商业质感，强层级，强冲击。当前输入人脸图仅作为人物身份参考；当前风格参考图仅作为版式质感参考，不照抄文字、构图或题材。
 
 先内部推演创意逻辑：这张图的核心钩子是什么，人物动作、核心道具、背景场景之间为什么有关联。不要输出推演过程，直接生成图。
 
@@ -75,6 +80,8 @@ Use one direction per generated cover:
 
 After generation, inspect:
 
+- Are there exactly 3 separate image files rather than one combined collage?
+- Does each file strictly use a single `3:4` vertical canvas?
 - Does the face still read as the same person?
 - Is the title readable at thumbnail size?
 - Is there one obvious hook?
