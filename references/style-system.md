@@ -1,5 +1,7 @@
 # Style System
 
+Deprecated reference kept for backward compatibility. New cover generation must read style details from `references/cover-styles/` instead of this combined file. Add, remove, or edit styles in the separate `.md` files under `references/cover-styles/`.
+
 Use this reference to choose a cover style. Do not default to retro unless the topic actually calls for it. If the user specifies a style, follow the user unless it conflicts with safety or the face-reference constraints.
 
 ## Global Style Rules

@@ -1,6 +1,6 @@
 # Cover and Copy
 
-`Cover and Copy` 是一个用于 Codex 的本地 skill，可根据中文文案、视频脚本、大纲或文档内容生成高点击短视频封面和小红书配套文案，并支持多风格视觉适配、固定人脸身份参考、竖版 3:4 与横版 16:9/4:3 延展。
+`Cover and Copy` 是一个用于 Codex 的本地 skill，可根据中文文案、视频脚本、大纲或文档内容生成高点击短视频封面和小红书配套文案，并支持可配置封面风格文档、固定人脸身份参考、竖版 3:4 与横版 16:9/4:3 延展。
 
 ## 在 Codex 里使用
 
@@ -12,7 +12,7 @@
 使用 Cover and Copy 技能
 ```
 
-然后粘贴中文文案、视频脚本或大纲，skill 会按规则生成 3 张竖版封面；需要横版时，再基于竖版母版延展为同系列横版；需要发布文案时，会生成小红书标题和 200 字左右正文。
+然后粘贴中文文案、视频脚本或大纲。封面生成前，skill 会读取 `references/cover-styles/` 里的可用风格文档并自动匹配最合适的风格，然后直接按规则生成 3 张彼此分开的独立竖版封面；需要横版时，再基于竖版母版延展为同系列横版；需要发布文案时，会生成小红书标题和 200 字左右正文。
 
 ## 发布流程
 
@@ -33,8 +33,8 @@
 - 默认使用 `assets/face/default-face.png` 作为人脸身份参考图。
 - 强制要求把人脸图作为真实图片输入传给生图模型，不能只在提示词里写图片路径。
 - 默认让人物保持本人脸部辨识度，但根据主题调整表情、服装、动作、光线和场景。
-- 提供 `scripts/face_edit_cover.py`，可把默认人脸图真实上传到后台图片编辑模型，不再依赖纯文本提示。
-- 支持多种视觉风格，参考 `assets/style-references/` 下的成功封面层级和质感，但不默认绑定复古风。
+- 默认通过 Codex 对话内置 `image_gen` 生成封面：先载入默认人脸图，再直接出图；同时提供 `scripts/face_edit_cover.py` 作为后台 API 兜底。
+- 支持在 `references/cover-styles/` 中配置多个独立封面风格文档，生成封面前会自动匹配风格并直接出图。
 
 ## 目录结构
 
@@ -54,19 +54,27 @@
 ├── scripts/
 │   └── face_edit_cover.py
 └── references/
+    ├── cover-styles/
+    │   ├── cinematic-blockbuster.md
+    │   ├── clean-knowledge-creator.md
+    │   ├── dramatic-before-after.md
+    │   ├── editorial-magazine.md
+    │   ├── minimal-product-visual.md
+    │   ├── real-workspace-documentary.md
+    │   ├── retro-commercial-poster.md
+    │   └── tech-product-launch.md
     ├── content-brief.md
     ├── copywriting.md
     ├── cover-prompt-templates.md
     ├── face-edit-workflow.md
-    ├── horizontal-adaptation.md
-    └── style-system.md
+    └── horizontal-adaptation.md
 ```
 
 ## 注意事项
 
 `assets/face/default-face.png` 是默认人脸参考图。如果要发布为公开仓库，请先确认这张图片可以公开；否则建议保持私有仓库，或替换成你允许公开的人脸参考图。
 
-如果你要让 Codex 真的把这张脸上传给后台模型，不能只调用内置纯文本生图工具。推荐使用：
+默认使用 Codex 对话内置生图能力：先把 `assets/face/default-face.png` 作为图片载入当前上下文，再调用内置 `image_gen`，并在提示词中明确要求以上一张已载入的人脸图作为身份锚点。只有在内置生图不可用、用户明确要求后台 API，或需要兜底修复人脸稳定性时，才使用：
 
 ```bash
 export CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
@@ -78,4 +86,4 @@ python3 scripts/face_edit_cover.py \
   --out output/imagegen/christmas-cover.png
 ```
 
-这个脚本会调用 `$CODEX_HOME/skills/.system/imagegen/scripts/image_gen.py edit`，并把 `assets/face/default-face.png` 作为第一张 `--image` 真正上传给 OpenAI 图片编辑接口。
+这个脚本会调用 `$CODEX_HOME/skills/.system/imagegen/scripts/image_gen.py edit`，并把 `assets/face/default-face.png` 作为第一张 `--image` 真正上传给 OpenAI 图片编辑接口。它是兜底链路，不是默认链路。

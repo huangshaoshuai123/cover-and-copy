@@ -23,7 +23,7 @@ Create this brief internally unless the user asks to see it:
 3 秒钩子：
 目标观众：
 情绪基调：
-最适合的视觉风格：
+自动匹配的视觉风格：
 主标题：
 副标题：
 核心卖点：
@@ -86,5 +86,5 @@ Before generating images, make sure the brief answers:
 - What is the one thing viewers should understand in 1 second?
 - What object proves that idea visually?
 - Why is the person in this scene?
-- What style best matches the topic and audience?
+- Which style document best matches the topic and audience for direct generation?
 - Which details must be removed so the cover does not get crowded?
