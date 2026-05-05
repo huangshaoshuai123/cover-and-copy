@@ -14,7 +14,16 @@ Ensure the skill uses a model path that actually uploads the face reference imag
 
 ## Default execution path
 
-Use the local wrapper:
+Use Codex built-in image generation first:
+
+1. Load `assets/face/default-face.png` into the current conversation with `view_image`.
+2. Call the built-in `image_gen` tool.
+3. State in the image prompt that the previously loaded face image is the identity anchor.
+4. Generate 3 vertical `3:4` cover candidates by default.
+
+## Fallback local wrapper
+
+Use the local wrapper only when built-in `image_gen` is unavailable, the user explicitly asks for the backend API path, or the built-in result needs a face-stability fallback:
 
 ```bash
 python3 scripts/face_edit_cover.py \
@@ -43,7 +52,7 @@ Important:
 
 ## Failure handling
 
-- If `OPENAI_API_KEY` is missing, stop and say the backend upload path is unavailable.
+- If `OPENAI_API_KEY` is missing, only the fallback backend wrapper is unavailable; the default built-in `image_gen` path can still work after `view_image` loads the face image.
 - If the tool in use cannot upload local images, do not claim that face identity is preserved.
 - If face similarity is weak, retry with a tighter prompt that reinforces identity preservation and reduces scene complexity.
 - If batch generation drifts across variants, regenerate each cover separately with the same face input.

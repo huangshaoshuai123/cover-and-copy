@@ -7,7 +7,7 @@ Use this reference to generate the first set of vertical covers. The default out
 Load or infer:
 
 - Content brief from `content-brief.md`.
-- Chosen style from the user-selected file in `references/cover-styles/`.
+- Chosen style from the auto-matched or user-specified file in `references/cover-styles/`.
 - Identity reference image, normally `assets/face/default-face.png`.
 - Optional style reference images, used only for hierarchy and quality.
 
@@ -23,7 +23,7 @@ Do not output the prompt unless the user asks. Generate images directly when the
 - The title should occupy the upper 25% to 40% of the image and remain readable on mobile.
 - Person should be clear, identity-preserved, and actively interacting with the core object.
 - Core object should be oversized or visually emphasized enough to explain the hook.
-- Background must match the user-selected style document and topic.
+- Background must match the auto-matched or user-specified style document and topic.
 
 ## Identity Prompt Block
 
@@ -58,7 +58,7 @@ Use this meaning in every prompt:
 
 ## Style Variables
 
-Fill these fields only from the selected style document:
+Fill these fields only from the matched or user-specified style document:
 
 ```text
 风格名称：
@@ -71,7 +71,7 @@ Fill these fields only from the selected style document:
 避免元素：
 ```
 
-If a selected style document does not define a needed field, infer from that same document only. Do not pull style details from `SKILL.md`.
+If the matched style document does not define a needed field, infer from that same document only. Do not pull style details from `SKILL.md`.
 
 ## Three Variant Directions
 
