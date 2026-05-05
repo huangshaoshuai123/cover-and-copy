@@ -1,4 +1,4 @@
 interface:
   display_name: "Cover and Copy"
   short_description: "根据文案、脚本或大纲生成短视频封面、小红书标题和正文"
-  default_prompt: "使用 $Cover and Copy，根据我的文案、脚本或大纲生成 3 张 3:4 竖版封面；封面任务默认必须走 scripts/face_edit_cover.py，把默认人脸参考图作为真实图片输入并强制锁定本人身份；需要时延展为 16:9 和 4:3 横版，并生成小红书标题和 200 字左右正文。"
+  default_prompt: "使用 $Cover and Copy，根据我的文案、脚本或大纲生成 3 张 3:4 竖版封面；生成封面前先列出 references/cover-styles/ 里的可用风格并让我选择；封面任务默认必须走 scripts/face_edit_cover.py，把默认人脸参考图作为真实图片输入并强制锁定本人身份；需要时延展为 16:9 和 4:3 横版，并生成小红书标题和 200 字左右正文。"

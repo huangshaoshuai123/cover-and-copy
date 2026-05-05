@@ -1,6 +1,6 @@
 # Cover and Copy
 
-`Cover and Copy` 是一个用于 Codex 的本地 skill，可根据中文文案、视频脚本、大纲或文档内容生成高点击短视频封面和小红书配套文案，并支持多风格视觉适配、固定人脸身份参考、竖版 3:4 与横版 16:9/4:3 延展。
+`Cover and Copy` 是一个用于 Codex 的本地 skill，可根据中文文案、视频脚本、大纲或文档内容生成高点击短视频封面和小红书配套文案，并支持可配置封面风格文档、固定人脸身份参考、竖版 3:4 与横版 16:9/4:3 延展。
 
 ## 在 Codex 里使用
 
@@ -12,7 +12,7 @@
 使用 Cover and Copy 技能
 ```
 
-然后粘贴中文文案、视频脚本或大纲，skill 会按规则生成 3 张竖版封面；需要横版时，再基于竖版母版延展为同系列横版；需要发布文案时，会生成小红书标题和 200 字左右正文。
+然后粘贴中文文案、视频脚本或大纲。封面生成前，skill 会先列出 `references/cover-styles/` 里的可用风格文档并让你选择；确认风格后，再按规则生成 3 张竖版封面。需要横版时，再基于竖版母版延展为同系列横版；需要发布文案时，会生成小红书标题和 200 字左右正文。
 
 ## 发布流程
 
@@ -34,7 +34,7 @@
 - 强制要求把人脸图作为真实图片输入传给生图模型，不能只在提示词里写图片路径。
 - 默认让人物保持本人脸部辨识度，但根据主题调整表情、服装、动作、光线和场景。
 - 提供 `scripts/face_edit_cover.py`，可把默认人脸图真实上传到后台图片编辑模型，不再依赖纯文本提示。
-- 支持多种视觉风格，参考 `assets/style-references/` 下的成功封面层级和质感，但不默认绑定复古风。
+- 支持在 `references/cover-styles/` 中配置多个独立封面风格文档，生成封面前必须先选择风格。
 
 ## 目录结构
 
@@ -54,12 +54,20 @@
 ├── scripts/
 │   └── face_edit_cover.py
 └── references/
+    ├── cover-styles/
+    │   ├── cinematic-blockbuster.md
+    │   ├── clean-knowledge-creator.md
+    │   ├── dramatic-before-after.md
+    │   ├── editorial-magazine.md
+    │   ├── minimal-product-visual.md
+    │   ├── real-workspace-documentary.md
+    │   ├── retro-commercial-poster.md
+    │   └── tech-product-launch.md
     ├── content-brief.md
     ├── copywriting.md
     ├── cover-prompt-templates.md
     ├── face-edit-workflow.md
-    ├── horizontal-adaptation.md
-    └── style-system.md
+    └── horizontal-adaptation.md
 ```
 
 ## 注意事项
