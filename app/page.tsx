@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 type GenerateResult = {
   titles: string[];
@@ -19,14 +19,48 @@ const defaultScript =
 export default function Page() {
   const [script, setScript] = useState(defaultScript);
   const [faceFile, setFaceFile] = useState<File | null>(null);
+  const [facePreview, setFacePreview] = useState<string | null>("/default-face.png");
+  const [faceRemoved, setFaceRemoved] = useState(false);
   const [result, setResult] = useState<GenerateResult | null>(null);
   const [message, setMessage] = useState("粘贴脚本后即可生成。人脸默认使用固定参考图。");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const faceInputRef = useRef<HTMLInputElement | null>(null);
 
   const canSubmit = useMemo(() => {
     return script.trim().length > 20 && !loading;
   }, [script, loading]);
+
+  useEffect(() => {
+    if (!faceFile) return;
+    const url = URL.createObjectURL(faceFile);
+    setFacePreview(url);
+    setFaceRemoved(false);
+    return () => URL.revokeObjectURL(url);
+  }, [faceFile]);
+
+  function replaceFace(file: File | null) {
+    if (!file) return;
+    setFaceFile(file);
+  }
+
+  function removeFace() {
+    setFaceFile(null);
+    setFacePreview(null);
+    setFaceRemoved(true);
+    if (faceInputRef.current) {
+      faceInputRef.current.value = "";
+    }
+  }
+
+  function restoreDefaultFace() {
+    setFaceFile(null);
+    setFacePreview("/default-face.png");
+    setFaceRemoved(false);
+    if (faceInputRef.current) {
+      faceInputRef.current.value = "";
+    }
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -38,6 +72,7 @@ export default function Page() {
     const form = new FormData();
     form.set("script", script.trim());
     if (faceFile) form.set("faceImage", faceFile);
+    if (faceRemoved) form.set("disableFace", "1");
 
     try {
       const response = await fetch("/api/generate", {
@@ -49,7 +84,13 @@ export default function Page() {
         throw new Error(payload.error || "生成失败");
       }
       setResult(payload);
-      setMessage(faceFile ? "生成完成。封面使用了本次上传的人脸参考图。" : "生成完成。封面默认使用固定人脸参考图。");
+      setMessage(
+        faceRemoved
+          ? "生成完成。封面没有使用人物面部参考图。"
+          : faceFile
+            ? "生成完成。封面使用了本次上传的人脸参考图。"
+            : "生成完成。封面默认使用固定人脸参考图。"
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "生成失败");
       setMessage("生成未完成。");
@@ -82,14 +123,41 @@ export default function Page() {
 
           <div className="field">
             <label htmlFor="faceImage">人物面部参考图</label>
-            <div className="file-box">
+            <div className="face-card">
+              <div className="face-preview">
+                {facePreview ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={facePreview} alt="人物面部参考图" />
+                ) : (
+                  <span>未使用人脸</span>
+                )}
+              </div>
+              <div className="face-info">
+                <strong>{faceRemoved ? "未使用人脸参考图" : faceFile ? faceFile.name : "默认人脸参考图"}</strong>
+                <small>{faceRemoved ? "本次会生成不锁定真人身份的封面。" : "不更改时默认使用当前参考图。"}</small>
+                <div className="face-actions">
+                  <button className="secondary" type="button" onClick={() => faceInputRef.current?.click()}>
+                    更换
+                  </button>
+                  {faceRemoved ? (
+                    <button className="secondary" type="button" onClick={restoreDefaultFace}>
+                      恢复默认
+                    </button>
+                  ) : (
+                    <button className="secondary" type="button" onClick={removeFace}>
+                      删除
+                    </button>
+                  )}
+                </div>
+              </div>
               <input
                 id="faceImage"
+                ref={faceInputRef}
+                className="hidden-input"
                 type="file"
                 accept="image/png,image/jpeg,image/webp"
-                onChange={(event) => setFaceFile(event.target.files?.[0] || null)}
+                onChange={(event) => replaceFace(event.target.files?.[0] || null)}
               />
-              <small>{faceFile ? `本次使用：${faceFile.name}` : "不上传时默认使用固定人脸参考图。"}</small>
             </div>
           </div>
 
@@ -155,7 +223,7 @@ export default function Page() {
                 </div>
               ) : null}
 
-              <p className="meta">人物面部参考图可选；不上传时默认使用固定人脸参考图。页面不会显示或收集 API key。</p>
+              <p className="meta">人物面部参考图默认已选中；可以更换或删除。页面不会显示或收集 API key。</p>
             </div>
           </div>
         </section>

@@ -151,6 +151,60 @@ button {
   width: 100%;
 }
 
+.hidden-input {
+  display: none;
+}
+
+.face-card {
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  border: 1px solid var(--line);
+  background: var(--soft);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.face-preview {
+  width: 82px;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #111827;
+  display: grid;
+  place-items: center;
+  color: #cbd5e1;
+  font-size: 12px;
+  text-align: center;
+}
+
+.face-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.face-info {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.face-info strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.face-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 2px;
+}
+
 .primary {
   width: 100%;
   min-height: 46px;

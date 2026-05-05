@@ -235,6 +235,7 @@ export async function POST(request: Request) {
     const config = serverConfig();
     const script = String(form.get("script") || "").trim();
     const uploadedFace = faceFromForm(form.get("faceImage"));
+    const useFace = form.get("disableFace") !== "1";
 
     if (!config.apiKey) {
       return NextResponse.json({ error: "服务端缺少 API key 配置。" }, { status: 500 });
@@ -251,8 +252,8 @@ export async function POST(request: Request) {
       script,
       styleName: style.name
     });
-    const faceImage = uploadedFace || (await loadDefaultFace());
-    const coverPrompt = buildCoverPrompt(script, style, copy, true);
+    const faceImage = uploadedFace || (useFace ? await loadDefaultFace() : null);
+    const coverPrompt = buildCoverPrompt(script, style, copy, Boolean(faceImage));
     const models = [config.imageModel, config.fallbackImageModel].filter(Boolean);
     const uniqueModels = Array.from(new Set(models));
     const attempts: ImageAttempt[] = [];
