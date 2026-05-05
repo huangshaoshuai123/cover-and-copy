@@ -33,6 +33,7 @@
 - 默认使用 `assets/face/default-face.png` 作为人脸身份参考图。
 - 强制要求把人脸图作为真实图片输入传给生图模型，不能只在提示词里写图片路径。
 - 默认让人物保持本人脸部辨识度，但根据主题调整表情、服装、动作、光线和场景。
+- 提供 `scripts/face_edit_cover.py`，可把默认人脸图真实上传到后台图片编辑模型，不再依赖纯文本提示。
 - 支持多种视觉风格，参考 `assets/style-references/` 下的成功封面层级和质感，但不默认绑定复古风。
 
 ## 目录结构
@@ -50,10 +51,13 @@
 │       ├── ai-short-drama-cover.png
 │       ├── web-design-cover.png
 │       └── world-model-cover.png
+├── scripts/
+│   └── face_edit_cover.py
 └── references/
     ├── content-brief.md
     ├── copywriting.md
     ├── cover-prompt-templates.md
+    ├── face-edit-workflow.md
     ├── horizontal-adaptation.md
     └── style-system.md
 ```
@@ -61,3 +65,17 @@
 ## 注意事项
 
 `assets/face/default-face.png` 是默认人脸参考图。如果要发布为公开仓库，请先确认这张图片可以公开；否则建议保持私有仓库，或替换成你允许公开的人脸参考图。
+
+如果你要让 Codex 真的把这张脸上传给后台模型，不能只调用内置纯文本生图工具。推荐使用：
+
+```bash
+export CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
+export OPENAI_API_KEY="你的 key"
+
+python3 scripts/face_edit_cover.py \
+  --prompt "生成 3:4 竖版短视频封面，保留第一张输入图片中的同一真人身份，圣诞毛毡风产品广告，高级商业质感，大标题“圣诞广告”，副标“10分钟 AI生成”" \
+  --style-ref assets/style-references/ai-short-drama-cover.png \
+  --out output/imagegen/christmas-cover.png
+```
+
+这个脚本会调用 `$CODEX_HOME/skills/.system/imagegen/scripts/image_gen.py edit`，并把 `assets/face/default-face.png` 作为第一张 `--image` 真正上传给 OpenAI 图片编辑接口。
