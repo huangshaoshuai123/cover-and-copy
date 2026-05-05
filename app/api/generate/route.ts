@@ -173,6 +173,13 @@ async function loadDefaultFace() {
   return new Blob([new Uint8Array(bytes)], { type: "image/png" });
 }
 
+function faceFromForm(value: FormDataEntryValue | null) {
+  if (value instanceof File && value.size > 0) {
+    return value;
+  }
+  return null;
+}
+
 async function callImageApi({
   apiKey,
   baseUrl,
@@ -227,6 +234,7 @@ export async function POST(request: Request) {
     const form = await request.formData();
     const config = serverConfig();
     const script = String(form.get("script") || "").trim();
+    const uploadedFace = faceFromForm(form.get("faceImage"));
 
     if (!config.apiKey) {
       return NextResponse.json({ error: "服务端缺少 API key 配置。" }, { status: 500 });
@@ -243,7 +251,7 @@ export async function POST(request: Request) {
       script,
       styleName: style.name
     });
-    const faceImage = await loadDefaultFace();
+    const faceImage = uploadedFace || (await loadDefaultFace());
     const coverPrompt = buildCoverPrompt(script, style, copy, true);
     const models = [config.imageModel, config.fallbackImageModel].filter(Boolean);
     const uniqueModels = Array.from(new Set(models));

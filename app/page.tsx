@@ -18,22 +18,15 @@ const defaultScript =
 
 export default function Page() {
   const [script, setScript] = useState(defaultScript);
-  const [scriptFileName, setScriptFileName] = useState("");
+  const [faceFile, setFaceFile] = useState<File | null>(null);
   const [result, setResult] = useState<GenerateResult | null>(null);
-  const [message, setMessage] = useState("上传或粘贴脚本后即可生成。");
+  const [message, setMessage] = useState("粘贴脚本后即可生成。人脸默认使用固定参考图。");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const canSubmit = useMemo(() => {
     return script.trim().length > 20 && !loading;
   }, [script, loading]);
-
-  async function onScriptFile(file: File | null) {
-    if (!file) return;
-    setScriptFileName(file.name);
-    const text = await file.text();
-    setScript(text);
-  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -44,6 +37,7 @@ export default function Page() {
 
     const form = new FormData();
     form.set("script", script.trim());
+    if (faceFile) form.set("faceImage", faceFile);
 
     try {
       const response = await fetch("/api/generate", {
@@ -55,7 +49,7 @@ export default function Page() {
         throw new Error(payload.error || "生成失败");
       }
       setResult(payload);
-      setMessage("生成完成。封面默认使用固定人脸参考图。");
+      setMessage(faceFile ? "生成完成。封面使用了本次上传的人脸参考图。" : "生成完成。封面默认使用固定人脸参考图。");
     } catch (err) {
       setError(err instanceof Error ? err.message : "生成失败");
       setMessage("生成未完成。");
@@ -71,22 +65,9 @@ export default function Page() {
           <div className="brand">
             <div>
               <h1>Cover and Copy</h1>
-              <p>上传脚本，生成小红书文案和 3:4 封面。后端使用已配置好的生成通道。</p>
+              <p>粘贴脚本，生成小红书文案和 3:4 封面。默认使用固定人脸参考图。</p>
             </div>
             <span className="status-pill">一键生成</span>
-          </div>
-
-          <div className="field">
-            <label htmlFor="scriptFile">上传脚本文件</label>
-            <div className="file-box">
-              <input
-                id="scriptFile"
-                type="file"
-                accept=".txt,.md,.text"
-                onChange={(event) => onScriptFile(event.target.files?.[0] || null)}
-              />
-              {scriptFileName ? <small>已载入：{scriptFileName}</small> : null}
-            </div>
           </div>
 
           <div className="field">
@@ -97,6 +78,19 @@ export default function Page() {
               value={script}
               onChange={(event) => setScript(event.target.value)}
             />
+          </div>
+
+          <div className="field">
+            <label htmlFor="faceImage">人物面部参考图</label>
+            <div className="file-box">
+              <input
+                id="faceImage"
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                onChange={(event) => setFaceFile(event.target.files?.[0] || null)}
+              />
+              <small>{faceFile ? `本次使用：${faceFile.name}` : "不上传时默认使用固定人脸参考图。"}</small>
+            </div>
           </div>
 
           <button className="primary" type="submit" disabled={!canSubmit}>
@@ -161,7 +155,7 @@ export default function Page() {
                 </div>
               ) : null}
 
-              <p className="meta">封面默认使用固定人脸参考图；页面不会显示或收集 API key。</p>
+              <p className="meta">人物面部参考图可选；不上传时默认使用固定人脸参考图。页面不会显示或收集 API key。</p>
             </div>
           </div>
         </section>
